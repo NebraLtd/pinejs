@@ -12,6 +12,23 @@ import { delay } from '../sbvr-api/control-flow';
 
 // tslint:disable-next-line:no-var-requires
 export const modelText = require('./migrations.sbvr');
+export const migrations: Migrations = {
+	'15.0.0-data-types': async (tx, { db }) => {
+		switch (db.engine) {
+			case 'mysql':
+				await tx.executeSql(`\
+					ALTER TABLE "migration"
+					MODIFY "executed migrations" JSON NOT NULL;`);
+				break;
+			case 'postgres':
+				await tx.executeSql(`\
+					ALTER TABLE "migration"
+					ALTER COLUMN "executed migrations" SET DATA TYPE JSONB USING b::JSONB;`);
+				break;
+			// No need to migrate for websql
+		}
+	},
+};
 
 import * as sbvrUtils from '../sbvr-api/sbvr-utils';
 export enum MigrationCategories {
@@ -73,14 +90,14 @@ export function isSyncMigration(
 	return typeof migration === 'function' || typeof migration === 'string';
 }
 export function areCategorizedMigrations(
-	migrations: Migrations,
-): migrations is CategorizedMigrations {
+	$migrations: Migrations,
+): $migrations is CategorizedMigrations {
 	const containsCategories = Object.keys(MigrationCategories).some(
-		(key) => key in migrations,
+		(key) => key in $migrations,
 	);
 	if (
 		containsCategories &&
-		Object.keys(migrations).some((key) => !(key in MigrationCategories))
+		Object.keys($migrations).some((key) => !(key in MigrationCategories))
 	) {
 		throw new Error(
 			'Mixing categorized and uncategorized migrations is not supported',
@@ -104,31 +121,31 @@ export type MigrationStatus = {
 };
 
 export const getRunnableAsyncMigrations = (
-	migrations: Migrations,
+	$migrations: Migrations,
 ): RunnableAsyncMigrations | undefined => {
-	if (migrations[MigrationCategories.async]) {
+	if ($migrations[MigrationCategories.async]) {
 		if (
-			Object.values(migrations[MigrationCategories.async]).some(
+			Object.values($migrations[MigrationCategories.async]).some(
 				(migration) => !isAsyncMigration(migration),
 			) ||
-			typeof migrations[MigrationCategories.async] !== 'object'
+			typeof $migrations[MigrationCategories.async] !== 'object'
 		) {
 			throw new Error(
 				`All loaded async migrations need to be of type: ${MigrationCategories.async}`,
 			);
 		}
-		return migrations[MigrationCategories.async] as RunnableAsyncMigrations;
+		return $migrations[MigrationCategories.async] as RunnableAsyncMigrations;
 	}
 };
 
 // migration loader should either get migrations from model
 // or from the filepath
 export const getRunnableSyncMigrations = (
-	migrations: Migrations,
+	$migrations: Migrations,
 ): RunnableMigrations => {
-	if (areCategorizedMigrations(migrations)) {
+	if (areCategorizedMigrations($migrations)) {
 		const runnableMigrations: RunnableMigrations = {};
-		for (const [category, categoryMigrations] of Object.entries(migrations)) {
+		for (const [category, categoryMigrations] of Object.entries($migrations)) {
 			if (category in MigrationCategories) {
 				for (const [key, migration] of Object.entries(
 					categoryMigrations as Migrations,
@@ -145,16 +162,16 @@ export const getRunnableSyncMigrations = (
 		}
 		return runnableMigrations;
 	}
-	return migrations;
+	return $migrations;
 };
 
 // turns {"key1": migration, "key3": migration, "key2": migration}
 // into  [["key1", migration], ["key2", migration], ["key3", migration]]
 export const filterAndSortPendingMigrations = (
-	migrations: NonNullable<RunnableMigrations | RunnableAsyncMigrations>,
+	$migrations: NonNullable<RunnableMigrations | RunnableAsyncMigrations>,
 	executedMigrations: string[],
 ): MigrationTuple[] =>
-	(_(migrations).omit(executedMigrations) as _.Object<typeof migrations>)
+	(_($migrations).omit(executedMigrations) as _.Object<typeof $migrations>)
 		.toPairs()
 		.sortBy(([migrationKey]) => migrationKey)
 		.value();
@@ -313,8 +330,10 @@ WHERE "migration"."model name" = ${1}`,
 	if (data == null) {
 		return [];
 	}
-
-	return JSON.parse(data.executed_migrations) as string[];
+	if (typeof data.executed_migrations === 'string') {
+		return JSON.parse(data.executed_migrations);
+	}
+	return data.executed_migrations;
 };
 
 export const migrationTablesExist = async (tx: Tx) => {
@@ -338,7 +357,7 @@ WHERE NOT EXISTS (SELECT 1 FROM "migration status" WHERE "migration key" = ${5})
 			[
 				migrationStatus['migration_key'],
 				migrationStatus['start_time'],
-				migrationStatus['is_backing_off'] ? 1 : 0,
+				migrationStatus['is_backing_off'],
 				migrationStatus['run_count'],
 				migrationStatus['migration_key'],
 			],
@@ -372,7 +391,7 @@ WHERE "migration status"."migration key" = ${7};`,
 				migrationStatus['migrated_row_count'],
 				migrationStatus['error_count'],
 				migrationStatus['converged_time'],
-				migrationStatus['is_backing_off'] ? 1 : 0,
+				migrationStatus['is_backing_off'],
 				migrationStatus['migration_key'],
 			],
 		);
@@ -409,7 +428,8 @@ LIMIT 1;`,
 			migrated_row_count: data['migrated row count'],
 			error_count: data['error count'],
 			converged_time: data['converged time'],
-			is_backing_off: data['is backing off'] === 1,
+			is_backing_off:
+				data['is backing off'] === true || data['is backing off'] === 1,
 		};
 	} catch (err: any) {
 		// we report any error here, as no error should happen at all
