@@ -173,6 +173,21 @@ export class PinejsSessionStore extends Store {
 						ALTER TABLE "session"
 						ADD COLUMN IF NOT EXISTS "modified at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL;
 					`,
+					'15.0.0-data-types': async (tx, sbvrUtils) => {
+						switch (sbvrUtils.db.engine) {
+							case 'mysql':
+								await tx.executeSql(`\
+									ALTER TABLE "session"
+									MODIFY "data" JSON NOT NULL;`);
+								break;
+							case 'postgres':
+								await tx.executeSql(`\
+									ALTER TABLE "session"
+									ALTER COLUMN "data" SET DATA TYPE JSONB USING b::JSONB;`);
+								break;
+							// No need to migrate for websql
+						}
+					},
 				},
 			},
 		],
