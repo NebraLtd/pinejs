@@ -140,7 +140,7 @@ const $parsePermissions = env.createCache(
 	},
 );
 
-const rewriteBinds = (
+const rewriteODataBinds = (
 	{ tree, extraBinds }: { tree: ODataQuery; extraBinds: ODataBinds },
 	odataBinds: ODataBinds,
 ): ODataQuery => {
@@ -163,7 +163,7 @@ const parsePermissions = (
 	odataBinds: ODataBinds,
 ): ODataQuery => {
 	const odata = $parsePermissions(filter);
-	return rewriteBinds(odata, odataBinds);
+	return rewriteODataBinds(odata, odataBinds);
 };
 
 // Traverses all values in `check`, actions for the following data types:
@@ -1044,6 +1044,7 @@ const getBoundConstrainedMemoizer = memoizeWeak(
 									sqlNameToODataName(permissionsTable.name),
 								),
 							);
+
 							return permissionsTable;
 						},
 					},
@@ -1660,7 +1661,8 @@ export const addPermissions = async (
 	req: PermissionReq,
 	request: ODataRequest & { permissionType?: PermissionCheck },
 ): Promise<void> => {
-	const { vocabulary, resourceName, odataQuery, odataBinds } = request;
+	const { resourceName, odataQuery, odataBinds } = request;
+	const vocabulary = _.last(request.translateVersions)!;
 	let abstractSqlModel = sbvrUtils.getAbstractSqlModel(request);
 
 	let { permissionType } = request;
@@ -1690,7 +1692,10 @@ export const addPermissions = async (
 	);
 
 	if (!_.isEqual(permissionType, methodPermissions.GET)) {
-		const sqlName = sbvrUtils.resolveSynonym(request);
+		const sqlName = sbvrUtils.resolveSynonym({
+			...request,
+			resourceName: odataQuery.resource,
+		});
 		odataQuery.resource = `${sqlName}$permissions${JSON.stringify(
 			permissionType,
 		)}`;
@@ -1750,12 +1755,20 @@ export const setup = () => {
 			request,
 		}: {
 			req: HookReq;
-			request: ODataRequest & { permissionType?: PermissionCheck };
+			request: ODataRequest & {
+				permissionType?: PermissionCheck;
+				permissionsAdded?: boolean;
+			};
 		}) => {
 			// If the abstract sql query is already generated then adding permissions will do nothing
-			if (request.abstractSqlQuery != null) {
+			if (
+				request.abstractSqlQuery != null ||
+				request.permissionsAdded === true
+			) {
 				return;
 			}
+			// TODO: This should not be necessary and `all` hooks should automatically only be applied once
+			request.permissionsAdded = true;
 			if (
 				request.method === 'POST' &&
 				request.odataQuery.property?.resource === 'canAccess'
@@ -1780,6 +1793,10 @@ export const setup = () => {
 
 				const abstractSqlModel = sbvrUtils.getAbstractSqlModel(request);
 				request.resourceName = request.resourceName.slice(
+					0,
+					-'#canAccess'.length,
+				);
+				request.originalResourceName = request.originalResourceName.slice(
 					0,
 					-'#canAccess'.length,
 				);

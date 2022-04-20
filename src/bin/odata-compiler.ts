@@ -15,6 +15,7 @@ const generateAbstractSqlQuery = (modelFile: string, odata: string) => {
 		method: 'GET',
 		url: odata,
 		resourceName: odataAST.tree.resource,
+		originalResourceName: odataAST.tree.resource,
 		odataQuery: odataAST.tree,
 		odataBinds: odataAST.binds,
 		values: {},

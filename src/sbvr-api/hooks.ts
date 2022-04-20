@@ -16,6 +16,7 @@ import {
 	getAbstractSqlModel,
 	api,
 	Response,
+	models,
 } from './sbvr-utils';
 
 export interface HookReq {
@@ -42,7 +43,9 @@ export interface Hooks {
 	PREPARSE?: (options: Omit<HookArgs, 'request' | 'api'>) => HookResponse;
 	POSTPARSE?: (options: HookArgs) => HookResponse;
 	PRERUN?: (options: HookArgs & { tx: Tx }) => HookResponse;
+	/** These are run in reverse translation order from newest to oldest */
 	POSTRUN?: (options: HookArgs & { tx: Tx; result: any }) => HookResponse;
+	/** These are run in reverse translation order from newest to oldest */
 	PRERESPOND?: (
 		options: HookArgs & {
 			tx: Tx;
@@ -53,6 +56,7 @@ export interface Hooks {
 			data?: any;
 		},
 	) => HookResponse;
+	/** These are run in reverse translation order from newest to oldest */
 	'POSTRUN-ERROR'?: (
 		options: HookArgs & { error: TypedError | any },
 	) => HookResponse;
@@ -126,13 +130,15 @@ class SideEffectHook<T extends HookFn> extends Hook<T> {
 
 // The execution order of rollback actions is unspecified
 export const rollbackRequestHooks = <T extends InstantiatedHooks>(
-	hooks: T | undefined,
+	versionedHooks: Array<[string, T]> | undefined,
 ): void => {
-	if (hooks == null) {
+	if (versionedHooks == null) {
 		return;
 	}
 	settleMapSeries(
-		Object.values(hooks).flatMap((v): Array<Hook<HookFn>> => v),
+		Object.values(versionedHooks).flatMap(
+			([, v]): Array<Hook<HookFn>> => Object.values(v).flat(),
+		),
 		async (hook) => {
 			if (hook instanceof SideEffectHook) {
 				await hook.rollback();
@@ -179,8 +185,13 @@ const getVocabHooks = (
 	if (methodHooks == null) {
 		return {};
 	}
+	const vocabHooks = getResourceHooks(methodHooks[vocabulary], resourceName);
+	if (models[vocabulary].translateTo) {
+		// Do not include `vocabulary='all'` hooks for translated vocabularies
+		return vocabHooks;
+	}
 	return mergeHooks(
-		getResourceHooks(methodHooks[vocabulary], resourceName),
+		vocabHooks,
 		getResourceHooks(methodHooks['all'], resourceName),
 	);
 };
@@ -205,7 +216,7 @@ export const getHooks = (
 				ParsedODataRequest,
 				'resourceName' | 'method' | 'vocabulary'
 			>,
-		);
+		).replace(/\$.*$/, '');
 	}
 	return instantiateHooks(
 		getMethodHooks(request.method, request.vocabulary, resourceName),
@@ -340,12 +351,11 @@ export const addPureHook = (
 	});
 };
 
-const defineApi = (args: HookArgs) => {
-	const { request, req, tx } = args;
-	const { vocabulary } = request;
+const defineApi = (version: string, args: HookArgs) => {
+	const { req, tx } = args;
 	Object.defineProperty(args, 'api', {
 		get: _.once(() =>
-			api[vocabulary].clone({
+			api[version].clone({
 				passthrough: { req, tx },
 			}),
 		),
@@ -354,15 +364,29 @@ const defineApi = (args: HookArgs) => {
 
 export const runHooks = async <T extends keyof Hooks>(
 	hookName: T,
-	hooksList: InstantiatedHooks | undefined,
+	hooksList: Array<[string, InstantiatedHooks]> | undefined,
 	args: Omit<Parameters<NonNullable<Hooks[T]>>[0], 'api'>,
 ) => {
 	if (hooksList == null) {
 		return;
 	}
-	const hooks = hooksList[hookName];
-	if (hooks == null || hooks.length === 0) {
+	const hooks = hooksList
+		.map(([version, $hooks]): [string, InstantiatedHooks[T] | undefined] => [
+			version,
+			$hooks[hookName],
+		])
+		.filter(
+			(v): v is [string, InstantiatedHooks[T]] =>
+				v[1] != null && v[1].length > 0,
+		);
+	if (hooks.length === 0) {
 		return;
+	}
+	if (['POSTRUN', 'PRERESPOND', 'POSTRUN-ERROR'].includes(hookName)) {
+		// Any hooks after we "run" the query are executed in reverse order from newest to oldest
+		// as they'll be translating the query results from "latest" backwards to the version that
+		// was actually requested
+		hooks.reverse();
 	}
 
 	let readOnlyArgs: typeof args;
@@ -372,22 +396,26 @@ export const runHooks = async <T extends keyof Hooks>(
 		// If we don't have a tx then read-only/writable is irrelevant
 		readOnlyArgs = args;
 	}
-
-	if ((args as HookArgs).request != null) {
-		defineApi(args as HookArgs);
-		if (args !== readOnlyArgs) {
-			// Only try to define a separate read-only api if it's different
-			defineApi(readOnlyArgs as HookArgs);
-		}
-	}
-
-	await Promise.all(
-		(hooks as Array<Hook<HookFn>>).map(async (hook) => {
-			if (hook.readOnlyTx) {
-				await hook.run(readOnlyArgs);
-			} else {
-				await hook.run(args);
+	for (const [version, versionHooks] of hooks) {
+		const versionedArgs = _.clone(args);
+		let versionedReadOnlyArgs = versionedArgs;
+		if ((args as HookArgs).request != null) {
+			defineApi(version, versionedArgs as HookArgs);
+			if (args !== readOnlyArgs) {
+				versionedReadOnlyArgs = _.clone(readOnlyArgs);
+				// Only try to define a separate read-only api if it's different
+				defineApi(version, versionedReadOnlyArgs as HookArgs);
 			}
-		}),
-	);
+		}
+
+		await Promise.all(
+			(versionHooks as Array<Hook<HookFn>>).map(async (hook) => {
+				if (hook.readOnlyTx) {
+					await hook.run(versionedReadOnlyArgs);
+				} else {
+					await hook.run(versionedArgs);
+				}
+			}),
+		);
+	}
 };
