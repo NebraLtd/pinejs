@@ -1,7 +1,16 @@
 import type * as Express from 'express';
-import type { AbstractSqlModel } from '@balena/abstract-sql-compiler';
+import type {
+	AbstractSqlModel,
+	ReferencedFieldNode,
+	Definition,
+} from '@balena/abstract-sql-compiler';
 import type { Database } from '../database-layer/db';
-import type { AnyObject, Resolvable } from '../sbvr-api/common-types';
+import type {
+	AnyObject,
+	Dictionary,
+	RequiredField,
+	Resolvable,
+} from '../sbvr-api/common-types';
 
 import {
 	Migration,
@@ -40,6 +49,10 @@ export interface Model {
 				setup: SetupFunction;
 		  };
 	logging?: { [key in keyof Console | 'default']?: boolean };
+	translateTo?: Model['apiRoot'];
+	translations?: Dictionary<
+		Definition | Dictionary<string | ReferencedFieldNode>
+	>;
 }
 export interface User {
 	username: string;
@@ -147,34 +160,59 @@ export const setup = (app: Express.Application) => {
 				);
 			}
 
+			const modelPromises: Dictionary<Promise<void>> = _(data.models)
+				.filter(
+					(model): model is RequiredField<typeof model, 'apiRoot'> =>
+						(model.abstractSql != null || model.modelText != null) &&
+						model.apiRoot != null,
+				)
+				.keyBy((model) => model.apiRoot)
+				.mapValues(async (model: Model) => {
+					try {
+						const { translateTo, translations } = model;
+						if (translateTo != null) {
+							// We add an async boundary here so that `mapValues` can complete and assign the
+							// waiting promises to `modelPromises` before we try to access it
+							await null;
+							if (modelPromises[translateTo] == null) {
+								throw new Error(
+									`Cannot translate to non-existent version '${translateTo}'`,
+								);
+							}
+							// Wait on the `translateTo` version since it needs to already be available
+							await modelPromises[translateTo];
+						} else if (translations != null) {
+							throw new Error(
+								'Cannot have translations without a translateTo target',
+							);
+						}
+
+						await sbvrUtils.executeModel(
+							tx,
+							model as sbvrUtils.ExecutableModel,
+						);
+
+						const apiRoute = `/${model.apiRoot}/*`;
+						app.options(apiRoute, (_req, res) => res.status(200).end());
+						app.all(apiRoute, sbvrUtils.handleODataRequest);
+
+						console.info(
+							'Successfully executed ' + model.modelName + ' model.',
+						);
+					} catch (err: any) {
+						const message = `Failed to execute '${model.modelName}' model from '${model.modelFile}'`;
+						if (_.isError(err)) {
+							err.message = `${message} due to: ${err.message}`;
+							throw err;
+						}
+						throw new Error(message);
+					}
+				})
+				.value();
+			await Promise.all(Object.values(modelPromises));
+
 			await Promise.all(
 				data.models.map(async (model) => {
-					if (
-						(model.abstractSql != null || model.modelText != null) &&
-						model.apiRoot != null
-					) {
-						try {
-							await sbvrUtils.executeModel(
-								tx,
-								model as sbvrUtils.ExecutableModel,
-							);
-
-							const apiRoute = `/${model.apiRoot}/*`;
-							app.options(apiRoute, (_req, res) => res.status(200).end());
-							app.all(apiRoute, sbvrUtils.handleODataRequest);
-
-							console.info(
-								'Successfully executed ' + model.modelName + ' model.',
-							);
-						} catch (err: any) {
-							const message = `Failed to execute ${model.modelName} model from ${model.modelFile}`;
-							if (_.isError(err)) {
-								err.message = message;
-								throw err;
-							}
-							throw new Error(message);
-						}
-					}
 					if (model.customServerCode != null) {
 						let customCode: SetupFunction;
 						if (typeof model.customServerCode === 'string') {

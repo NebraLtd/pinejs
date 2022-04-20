@@ -1,5 +1,4 @@
 import { getAbstractSqlModelFromFile, version, writeAll } from './utils';
-
 import type * as AbstractSql from '../sbvr-api/abstract-sql';
 import type * as UriParser from '../sbvr-api/uri-parser';
 import type { SqlResult } from '@balena/abstract-sql-compiler';
@@ -10,18 +9,22 @@ const generateAbstractSqlQuery = (modelFile: string, odata: string) => {
 	const { memoizedParseOdata, translateUri } =
 		require('../sbvr-api/uri-parser') as typeof UriParser;
 	const odataAST = memoizedParseOdata(odata);
-	return translateUri({
+	const vocabulary = '';
+	const request: UriParser.ODataRequest = {
 		engine: program.opts().engine,
 		method: 'GET',
 		url: odata,
 		resourceName: odataAST.tree.resource,
+		originalResourceName: odataAST.tree.resource,
 		odataQuery: odataAST.tree,
 		odataBinds: odataAST.binds,
 		values: {},
-		vocabulary: '',
+		vocabulary,
 		abstractSqlModel: getAbstractSqlModelFromFile(modelFile),
 		custom: {},
-	});
+		translateVersions: [vocabulary],
+	};
+	return translateUri(request);
 };
 
 const parseOData = (odata: string, outputFile?: string) => {
