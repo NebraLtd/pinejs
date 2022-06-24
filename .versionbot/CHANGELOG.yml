@@ -1,4 +1,24 @@
 - commits:
+    - subject: Refactur checkModelExists to isModelNew
+      hash: 2cc6e630cd8f7e544cdf6858597573501a255b8f
+      body: >
+        Modules may need to know if a model existed before initialisation of the
+        instance.
+
+        Eg. migrations need to know if a model is freshly generated / executed
+
+        of if this model already existed and can be target for migrations.
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Harald Fischer <harald@balena.io>
+        signed-off-by: Harald Fischer <harald@balena.io>
+      author: Harald Fischer
+      nested: []
+  version: 14.47.0
+  title: "'Add cross-usable flag for model exists before init'"
+  date: 2022-06-24T21:49:39.729Z
+- commits:
     - subject: Fix for passport.js update 0.6.0
       hash: c26d33dd13e4139b970e5bd594982786a1c56cea
       body: |
