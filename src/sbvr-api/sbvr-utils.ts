@@ -488,11 +488,10 @@ export function generateModels(
 			translations,
 		);
 	} else {
-		Object.keys(abstractSql.tables).forEach((key) => {
-			const table = abstractSql.tables[key];
+		for (const [key, table] of Object.entries(abstractSql.tables)) {
 			// Alias the current version so it can be explicitly referenced
 			abstractSql.tables[`${key}$${model.apiRoot}`] = _.clone(table);
-		});
+		}
 		try {
 			sql = generateSqlModel(abstractSql, targetDatabaseEngine);
 		} catch (e) {
@@ -552,10 +551,8 @@ export const executeModels = async (
 				deepFreeze(compiledModel.abstractSql);
 
 				const versions = [apiRoot];
-				let nextVersion = compiledModel.translateTo;
-				while (nextVersion != null) {
-					versions.push(nextVersion);
-					nextVersion = models[nextVersion].translateTo;
+				if (compiledModel.translateTo != null) {
+					versions.push(...models[compiledModel.translateTo].versions);
 				}
 				models[apiRoot] = {
 					...compiledModel,
@@ -985,11 +982,8 @@ const getFinalAbstractSqlModel = (
 		'translateVersions' | 'finalAbstractSqlModel'
 	>,
 ): AbstractSQLCompiler.AbstractSqlModel => {
-	if (request.finalAbstractSqlModel == null) {
-		request.finalAbstractSqlModel =
-			models[_.last(request.translateVersions)!].abstractSql;
-	}
-	return request.finalAbstractSqlModel;
+	const finalModel = _.last(request.translateVersions)!;
+	return (request.finalAbstractSqlModel ??= models[finalModel].abstractSql);
 };
 
 const getIdField = (

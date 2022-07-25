@@ -410,11 +410,7 @@ export const runHooks = async <T extends keyof Hooks>(
 
 		await Promise.all(
 			(versionHooks as Array<Hook<HookFn>>).map(async (hook) => {
-				if (hook.readOnlyTx) {
-					await hook.run(versionedReadOnlyArgs);
-				} else {
-					await hook.run(versionedArgs);
-				}
+				await hook.run(hook.readOnlyTx ? versionedReadOnlyArgs : versionedArgs);
 			}),
 		);
 	}

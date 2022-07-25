@@ -7,6 +7,7 @@ import type {
 import type { Database } from '../database-layer/db';
 import type {
 	AnyObject,
+	Dictionary,
 	RequiredField,
 	Resolvable,
 } from '../sbvr-api/common-types';
@@ -49,8 +50,8 @@ export interface Model {
 		  };
 	logging?: { [key in keyof Console | 'default']?: boolean };
 	translateTo?: Model['apiRoot'];
-	translations?: _.Dictionary<
-		Definition | _.Dictionary<string | ReferencedFieldNode>
+	translations?: Dictionary<
+		Definition | Dictionary<string | ReferencedFieldNode>
 	>;
 }
 export interface User {
@@ -159,7 +160,7 @@ export const setup = (app: Express.Application) => {
 				);
 			}
 
-			const modelPromises: _.Dictionary<Promise<void>> = _(data.models)
+			const modelPromises: Dictionary<Promise<void>> = _(data.models)
 				.filter(
 					(model): model is RequiredField<typeof model, 'apiRoot'> =>
 						(model.abstractSql != null || model.modelText != null) &&
@@ -207,7 +208,7 @@ export const setup = (app: Express.Application) => {
 					}
 				})
 				.value();
-			await Promise.all(_.map(modelPromises));
+			await Promise.all(Object.values(modelPromises));
 
 			await Promise.all(
 				data.models.map(async (model) => {

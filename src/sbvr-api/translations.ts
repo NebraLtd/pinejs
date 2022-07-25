@@ -14,6 +14,7 @@ import {
 	UnknownTypeNodes,
 	NullNode,
 } from '@balena/abstract-sql-compiler';
+import { Dictionary } from './common-types';
 
 type AliasValidNodeType =
 	| ReferencedFieldNode
@@ -25,7 +26,7 @@ type AliasValidNodeType =
 const aliasFields = (
 	abstractSqlModel: AbstractSqlModel,
 	resourceName: string,
-	aliases: _.Dictionary<string | AliasValidNodeType>,
+	aliases: Dictionary<string | AliasValidNodeType>,
 ): SelectNode[1] => {
 	const fieldNames = abstractSqlModel.tables[resourceName].fields.map(
 		({ fieldName }) => fieldName,
@@ -56,7 +57,7 @@ const aliasResource = (
 	abstractSqlModel: AbstractSqlModel,
 	resourceName: string,
 	toResource: string,
-	aliases: _.Dictionary<string | ReferencedFieldNode>,
+	aliases: Dictionary<string | ReferencedFieldNode>,
 ): Definition => {
 	if (!abstractSqlModel.tables[toResource]) {
 		throw new Error(`Tried to alias to a non-existent resource: ${toResource}`);
@@ -99,12 +100,15 @@ export const translateAbstractSqlModel = (
 	toAbstractSqlModel: AbstractSqlModel,
 	fromVersion: string,
 	toVersion: string,
-	definitions: _.Dictionary<
+	definitions: Dictionary<
 		| (Definition & { $toResource?: string })
-		| _.Dictionary<string | ReferencedFieldNode>
+		| Dictionary<string | ReferencedFieldNode>
 	> = {},
-): _.Dictionary<string> => {
-	const resourceRenames: _.Dictionary<string> = {};
+): Dictionary<string> => {
+	const isDefinition = (d: typeof definitions[string]): d is Definition =>
+		'abstractSql' in d;
+
+	const resourceRenames: Dictionary<string> = {};
 
 	// TODO: why?
 	fromAbstractSqlModel.rules = toAbstractSqlModel.rules;
@@ -160,17 +164,16 @@ export const translateAbstractSqlModel = (
 		fromAbstractSqlModel.tables[key] = _.cloneDeep(table);
 	});
 
-	fromKeys.forEach((key) => {
+	for (const key of fromKeys) {
 		const definition = definitions[key];
 		const table = fromAbstractSqlModel.tables[key];
 		if (definition) {
-			const hasToResource = typeof definition.$toResource === 'string';
+			const { $toResource } = definition;
+			const hasToResource = typeof $toResource === 'string';
 			if (hasToResource) {
-				resourceRenames[key] = `${definition.$toResource}`;
+				resourceRenames[key] = `${$toResource}`;
 			}
-			const toResource = hasToResource
-				? (definition.$toResource as string)
-				: `${key}$${toVersion}`;
+			const toResource = hasToResource ? $toResource : `${key}$${toVersion}`;
 			// TODO: Should this use the toAbstractSqlModel?
 			const toTable = fromAbstractSqlModel.tables[toResource];
 			if (!toTable) {
@@ -181,9 +184,7 @@ export const translateAbstractSqlModel = (
 				}
 			}
 			table.modifyFields = _.cloneDeep(toTable.modifyFields ?? toTable.fields);
-			table.modifyName = _.cloneDeep(toTable.modifyName ?? toTable.name);
-			const isDefinition = (d: typeof definition): d is Definition =>
-				'abstractSql' in d;
+			table.modifyName = toTable.modifyName ?? toTable.name;
 			if (isDefinition(definition)) {
 				const d = { ...definition };
 				delete d.$toResource;
@@ -209,7 +210,7 @@ export const translateAbstractSqlModel = (
 		// TODO: Why was this clone added?
 		// Also alias the current version so it can be explicitly referenced
 		fromAbstractSqlModel.tables[`${key}$${fromVersion}`] = _.clone(table);
-	});
+	}
 
 	return resourceRenames;
 };
