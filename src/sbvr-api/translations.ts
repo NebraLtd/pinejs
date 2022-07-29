@@ -147,7 +147,7 @@ export const translateAbstractSqlModel = (
 	const aliasedFromRelationships = _.cloneDeep(
 		fromAbstractSqlModel.relationships,
 	);
-	namespaceRelationships(aliasedFromRelationships as Relationship, fromVersion);
+	namespaceRelationships(aliasedFromRelationships, fromVersion);
 	_.forEach(aliasedFromRelationships, (relationship, key) => {
 		// Don't double alias
 		if (!key.includes('$')) {

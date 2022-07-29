@@ -1692,10 +1692,7 @@ export const addPermissions = async (
 	);
 
 	if (!_.isEqual(permissionType, methodPermissions.GET)) {
-		const sqlName = sbvrUtils.resolveSynonym({
-			...request,
-			resourceName: odataQuery.resource,
-		});
+		const sqlName = sbvrUtils.resolveSynonym(request);
 		odataQuery.resource = `${sqlName}$permissions${JSON.stringify(
 			permissionType,
 		)}`;
