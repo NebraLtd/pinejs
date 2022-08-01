@@ -169,10 +169,11 @@ export const setup = (app: Express.Application) => {
 				.keyBy((model) => model.apiRoot)
 				.mapValues(async (model: Model) => {
 					try {
-						// We use a dummy await here because we need the async boundary
-						await null;
 						const { translateTo, translations } = model;
 						if (translateTo != null) {
+							// We add an async boundary here so that `mapValues` can complete and assign the
+							// waiting promises to `modelPromises` before we try to access it
+							await null;
 							if (modelPromises[translateTo] == null) {
 								throw new Error(
 									`Cannot translate to non-existent version '${translateTo}'`,
