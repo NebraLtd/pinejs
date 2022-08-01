@@ -111,8 +111,7 @@ interface CompiledModel {
 	sql?: AbstractSQLCompiler.SqlModel;
 	odataMetadata: ReturnType<typeof generateODataMetadata>;
 }
-// TODO: We really shouldn't need to export this
-export const models: {
+const models: {
 	[vocabulary: string]: CompiledModel & {
 		versions: string[];
 	};
