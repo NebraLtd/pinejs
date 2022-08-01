@@ -110,7 +110,6 @@ export const translateAbstractSqlModel = (
 
 	const resourceRenames: Dictionary<string> = {};
 
-	// TODO: why?
 	fromAbstractSqlModel.rules = toAbstractSqlModel.rules;
 
 	const fromKeys = Object.keys(fromAbstractSqlModel.tables);
@@ -207,9 +206,8 @@ export const translateAbstractSqlModel = (
 				abstractSql: ['Resource', `${key}$${toVersion}`],
 			};
 		}
-		// TODO: Why was this clone added?
 		// Also alias the current version so it can be explicitly referenced
-		fromAbstractSqlModel.tables[`${key}$${fromVersion}`] = _.clone(table);
+		fromAbstractSqlModel.tables[`${key}$${fromVersion}`] = table;
 	}
 
 	return resourceRenames;

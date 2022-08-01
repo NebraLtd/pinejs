@@ -51,7 +51,7 @@ export interface ParsedODataRequest {
 	_defer?: boolean;
 }
 export interface ODataRequest extends ParsedODataRequest {
-	translateVersions?: string[];
+	translateVersions: string[];
 	abstractSqlModel?: AbstractSQLCompiler.AbstractSqlModel;
 	finalAbstractSqlModel?: AbstractSQLCompiler.AbstractSqlModel;
 	abstractSqlQuery?: AbstractSQLCompiler.AbstractSqlQuery;

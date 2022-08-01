@@ -16,7 +16,6 @@ import {
 	getAbstractSqlModel,
 	api,
 	Response,
-	models,
 } from './sbvr-utils';
 
 export interface HookReq {
@@ -180,14 +179,15 @@ const getResourceHooks = (vocabHooks: VocabHooks, resourceName?: string) => {
 const getVocabHooks = (
 	methodHooks: MethodHooks,
 	vocabulary: string,
-	resourceName?: string,
+	resourceName: string | undefined,
+	includeAllVocab: boolean,
 ) => {
 	if (methodHooks == null) {
 		return {};
 	}
 	const vocabHooks = getResourceHooks(methodHooks[vocabulary], resourceName);
-	if (models[vocabulary].translateTo) {
-		// Do not include `vocabulary='all'` hooks for translated vocabularies
+	if (!includeAllVocab) {
+		// Do not include `vocabulary='all'` hooks, useful for translated vocabularies
 		return vocabHooks;
 	}
 	return mergeHooks(
@@ -196,10 +196,20 @@ const getVocabHooks = (
 	);
 };
 const getMethodHooks = memoize(
-	(method: SupportedMethod, vocabulary: string, resourceName?: string) =>
+	(
+		method: SupportedMethod,
+		vocabulary: string,
+		resourceName: string | undefined,
+		includeAllVocab: boolean,
+	) =>
 		mergeHooks(
-			getVocabHooks(apiHooks[method], vocabulary, resourceName),
-			getVocabHooks(apiHooks['all'], vocabulary, resourceName),
+			getVocabHooks(
+				apiHooks[method],
+				vocabulary,
+				resourceName,
+				includeAllVocab,
+			),
+			getVocabHooks(apiHooks['all'], vocabulary, resourceName, includeAllVocab),
 		),
 	{ primitive: true },
 );
@@ -208,6 +218,7 @@ export const getHooks = (
 		OptionalField<ParsedODataRequest, 'resourceName'>,
 		'resourceName' | 'method' | 'vocabulary'
 	>,
+	includeAllVocab = true,
 ): InstantiatedHooks => {
 	let { resourceName } = request;
 	if (resourceName != null) {
@@ -219,7 +230,12 @@ export const getHooks = (
 		).replace(/\$.*$/, '');
 	}
 	return instantiateHooks(
-		getMethodHooks(request.method, request.vocabulary, resourceName),
+		getMethodHooks(
+			request.method,
+			request.vocabulary,
+			resourceName,
+			includeAllVocab,
+		),
 	);
 };
 getHooks.clear = () => getMethodHooks.clear();
