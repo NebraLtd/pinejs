@@ -1752,20 +1752,12 @@ export const setup = () => {
 			request,
 		}: {
 			req: HookReq;
-			request: ODataRequest & {
-				permissionType?: PermissionCheck;
-				permissionsAdded?: boolean;
-			};
+			request: ODataRequest & { permissionType?: PermissionCheck };
 		}) => {
 			// If the abstract sql query is already generated then adding permissions will do nothing
-			if (
-				request.abstractSqlQuery != null ||
-				request.permissionsAdded === true
-			) {
+			if (request.abstractSqlQuery != null) {
 				return;
 			}
-			// TODO: This should not be necessary and `all` hooks should automatically only be applied once
-			request.permissionsAdded = true;
 			if (
 				request.method === 'POST' &&
 				request.odataQuery.property?.resource === 'canAccess'
