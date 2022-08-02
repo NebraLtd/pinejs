@@ -1,4 +1,33 @@
 - commits:
+    - subject: Deprecate node 12
+      hash: ab7a75e7934c21ed6cfc3b3b8d19836a23878fe2
+      body: |
+        node 12 is EOL version
+      footer:
+        Change-type: major
+        change-type: major
+        Signed-off-by: Harald Fischer <harald@balena.io>
+        signed-off-by: Harald Fischer <harald@balena.io>
+      author: Harald Fischer
+      nested: []
+    - subject: Differentiate typings between parsed and processed odata requests
+      hash: af632f0cc0968b25d9acebca0d83bf22f84f617f
+      body: |
+        This allows us to make properties on the process odata request required
+        whereas previously they had to be optional in order to be compatible,
+        as of now this only affects the `engine` property but in future further
+        properties of the processed request could be made required. And even at
+        this point it will block passing a parsed only request object to a
+        function expecting a processed request object
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 15.0.0
+  title: "'Deprecate node 12'"
+  date: 2022-08-02T12:33:20.533Z
+- commits:
     - subject: Refactur checkModelExists to isModelNew
       hash: 28725993f36edb2f372145addb3841b9a899d880
       body: >
