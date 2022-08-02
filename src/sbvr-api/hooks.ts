@@ -129,13 +129,13 @@ class SideEffectHook<T extends HookFn> extends Hook<T> {
 
 // The execution order of rollback actions is unspecified
 export const rollbackRequestHooks = <T extends InstantiatedHooks>(
-	versionedHooks: Array<[string, T]> | undefined,
+	hooksList: Array<[modelName: string, hooks: T]> | undefined,
 ): void => {
-	if (versionedHooks == null) {
+	if (hooksList == null) {
 		return;
 	}
 	settleMapSeries(
-		Object.values(versionedHooks).flatMap(
+		Object.values(hooksList).flatMap(
 			([, v]): Array<Hook<HookFn>> => Object.values(v).flat(),
 		),
 		async (hook) => {
@@ -367,11 +367,11 @@ export const addPureHook = (
 	});
 };
 
-const defineApi = (version: string, args: HookArgs) => {
+const defineApi = (modelName: string, args: HookArgs) => {
 	const { req, tx } = args;
 	Object.defineProperty(args, 'api', {
 		get: _.once(() =>
-			api[version].clone({
+			api[modelName].clone({
 				passthrough: { req, tx },
 			}),
 		),
@@ -380,15 +380,19 @@ const defineApi = (version: string, args: HookArgs) => {
 
 export const runHooks = async <T extends keyof Hooks>(
 	hookName: T,
-	hooksList: Array<[string, InstantiatedHooks]> | undefined,
+	/**
+	 * A list of modelName/hooks to run in order, which will be reversed for hooks after the "RUN" stage,
+	 * ie POSTRUN/PRERESPOND/POSTRUN-ERROR
+	 */
+	hooksList: Array<[modelName: string, hooks: InstantiatedHooks]> | undefined,
 	args: Omit<Parameters<NonNullable<Hooks[T]>>[0], 'api'>,
 ) => {
 	if (hooksList == null) {
 		return;
 	}
 	const hooks = hooksList
-		.map(([version, $hooks]): [string, InstantiatedHooks[T] | undefined] => [
-			version,
+		.map(([modelName, $hooks]): [string, InstantiatedHooks[T] | undefined] => [
+			modelName,
 			$hooks[hookName],
 		])
 		.filter(
@@ -400,7 +404,7 @@ export const runHooks = async <T extends keyof Hooks>(
 	}
 	if (['POSTRUN', 'PRERESPOND', 'POSTRUN-ERROR'].includes(hookName)) {
 		// Any hooks after we "run" the query are executed in reverse order from newest to oldest
-		// as they'll be translating the query results from "latest" backwards to the version that
+		// as they'll be translating the query results from "latest" backwards to the model that
 		// was actually requested
 		hooks.reverse();
 	}
@@ -412,21 +416,21 @@ export const runHooks = async <T extends keyof Hooks>(
 		// If we don't have a tx then read-only/writable is irrelevant
 		readOnlyArgs = args;
 	}
-	for (const [version, versionHooks] of hooks) {
-		const versionedArgs = _.clone(args);
-		let versionedReadOnlyArgs = versionedArgs;
+	for (const [modelName, modelHooks] of hooks) {
+		const modelArgs = _.clone(args);
+		let modelReadOnlyArgs = modelArgs;
 		if ((args as HookArgs).request != null) {
-			defineApi(version, versionedArgs as HookArgs);
+			defineApi(modelName, modelArgs as HookArgs);
 			if (args !== readOnlyArgs) {
-				versionedReadOnlyArgs = _.clone(readOnlyArgs);
+				modelReadOnlyArgs = _.clone(readOnlyArgs);
 				// Only try to define a separate read-only api if it's different
-				defineApi(version, versionedReadOnlyArgs as HookArgs);
+				defineApi(modelName, modelReadOnlyArgs as HookArgs);
 			}
 		}
 
 		await Promise.all(
-			(versionHooks as Array<Hook<HookFn>>).map(async (hook) => {
-				await hook.run(hook.readOnlyTx ? versionedReadOnlyArgs : versionedArgs);
+			(modelHooks as Array<Hook<HookFn>>).map(async (hook) => {
+				await hook.run(hook.readOnlyTx ? modelReadOnlyArgs : modelArgs);
 			}),
 		);
 	}
