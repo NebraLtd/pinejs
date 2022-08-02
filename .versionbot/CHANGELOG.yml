@@ -1,4 +1,30 @@
 - commits:
+    - subject: Add support for models that are translated to other (newer) models
+      hash: 1ed34518ba6fa6008d01dc7ece4ed601f1ac3d9c
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+      nested: []
+    - subject: Differentiate typings between parsed and processed odata requests
+      hash: af632f0cc0968b25d9acebca0d83bf22f84f617f
+      body: |
+        This allows us to make properties on the process odata request required
+        whereas previously they had to be optional in order to be compatible,
+        as of now this only affects the `engine` property but in future further
+        properties of the processed request could be made required. And even at
+        this point it will block passing a parsed only request object to a
+        function expecting a processed request object
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 14.49.0
+  title: "'Add support for models that are translated to other (newer) models'"
+  date: 2022-08-02T11:02:18.272Z
+- commits:
     - subject: Refactur checkModelExists to isModelNew
       hash: 28725993f36edb2f372145addb3841b9a899d880
       body: >
