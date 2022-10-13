@@ -1,4 +1,18 @@
 - commits:
+    - subject: Add basic auth header middleware
+      hash: 0989822279240dcb4ec48dd1438c824e5fff44b4
+      body: |
+        Add basic permission tests
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+      nested: []
+  version: 14.52.0
+  date: 2022-10-13T13:48:01.489Z
+- commits:
     - subject: Update lodash typings
       hash: 734fd4c97f9438df4d2f80430739a4f1036e62cf
       body: ""
