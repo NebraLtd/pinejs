@@ -34,7 +34,10 @@ import { PinejsClientCore, PromiseResultTypes } from 'pinejs-client-core';
 import { ExtendedSBVRParser } from '../extended-sbvr-parser/extended-sbvr-parser';
 
 import * as syncMigrator from '../migrator/sync';
-import { generateODataMetadata } from '../odata-metadata/odata-metadata-generator';
+import {
+	generateMetadataOData,
+	generateMetadataOpenApi,
+} from '../metadata/metadata-generators';
 
 // tslint:disable-next-line:no-var-requires
 const devModel = require('./dev.sbvr');
@@ -105,7 +108,7 @@ interface CompiledModel {
 	lf?: LFModel | undefined;
 	abstractSql: AbstractSQLCompiler.AbstractSqlModel;
 	sql: AbstractSQLCompiler.SqlModel;
-	odataMetadata: ReturnType<typeof generateODataMetadata>;
+	odataMetadata: ReturnType<typeof generateMetadataOData>;
 }
 const models: {
 	[vocabulary: string]: CompiledModel;
@@ -452,9 +455,9 @@ export const generateModels = (
 
 	const odataMetadata = cachedCompile(
 		'metadata',
-		generateODataMetadata.version,
+		generateMetadataOData.version,
 		{ vocab, abstractSqlModel: abstractSql },
-		() => generateODataMetadata(vocab, abstractSql),
+		() => generateMetadataOData(vocab, abstractSql),
 	);
 
 	let sql: ReturnType<AbstractSQLCompiler.EngineInstance['compileSchema']>;
@@ -1533,11 +1536,34 @@ const respondGet = async (
 		return response;
 	} else {
 		if (request.resourceName === '$metadata') {
-			return {
-				statusCode: 200,
-				body: models[vocab].odataMetadata,
-				headers: { 'content-type': 'xml' },
-			};
+			const { openapi } = req.body;
+			const permLookup = await permissions.getReqPermissions(req);
+			let specJson = {};
+			if (openapi) {
+				specJson = generateMetadataOpenApi(
+					vocab,
+					models[vocab].abstractSql,
+					permLookup,
+					req.originalUrl.replace('/$metadata', ''),
+					req.hostname,
+				);
+				return {
+					statusCode: 200,
+					body: specJson,
+					headers: { 'content-type': 'application/json' },
+				};
+			} else {
+				specJson = generateMetadataOData(
+					vocab,
+					models[vocab].abstractSql,
+					permLookup,
+				);
+				return {
+					statusCode: 200,
+					body: models[vocab].odataMetadata,
+					headers: { 'content-type': 'application/json' },
+				};
+			}
 		} else {
 			// TODO: request.resourceName can be '$serviceroot' or a resource and we should return an odata xml document based on that
 			return {
@@ -1546,6 +1572,8 @@ const respondGet = async (
 		}
 	}
 };
+
+// paths./any/.get.responses.200.content.application/json.schema.d
 
 const runPost = async (
 	_req: Express.Request,

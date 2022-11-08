@@ -1,0 +1,23 @@
+{
+    "req": {
+        "method": "GET",
+        "url": "http://localhost:1337/example/$metadata",
+        "data": {
+            "openapi": true
+        },
+        "headers": {
+            "content-type": "application/json"
+        }
+    },
+    "header": {
+        "x-powered-by": "Express",
+        "cache-control": "no-cache",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "2139",
+        "etag": "W/\"85b-bxp1fjUPz+3tZ4a5Ox6dkCS1b3c\"",
+        "date": "Mon, 25 Jul 2022 10:13:47 GMT",
+        "connection": "close"
+    },
+    "status": 200,
+    "text": "{\"openapi\":\"3.0.2\",\"info\":{\"title\":\"Service for namespace example\",\"description\":\"This service is located at [https://localhost/example/](https://localhost/example/)\",\"version\":\"\"},\"servers\":[{\"url\":\"https://localhost/example\"}],\"tags\":[],\"paths\":{},\"components\":{\"schemas\":{\"count\":{\"anyOf\":[{\"type\":\"integer\",\"minimum\":0},{\"type\":\"string\"}],\"description\":\"The number of entities in the collection. Available when using the [$count](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptioncount) query option.\"},\"error\":{\"type\":\"object\",\"required\":[\"error\"],\"properties\":{\"error\":{\"type\":\"object\",\"required\":[\"code\",\"message\"],\"properties\":{\"code\":{\"type\":\"string\"},\"message\":{\"type\":\"string\"},\"target\":{\"type\":\"string\"},\"details\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"required\":[\"code\",\"message\"],\"properties\":{\"code\":{\"type\":\"string\"},\"message\":{\"type\":\"string\"},\"target\":{\"type\":\"string\"}}}},\"innererror\":{\"type\":\"object\",\"description\":\"The structure of this object is service-specific\"}}}}}},\"parameters\":{\"top\":{\"name\":\"top\",\"in\":\"query\",\"description\":\"Show only the first n items, see [Paging - Top](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptiontop)\",\"schema\":{\"type\":\"integer\",\"minimum\":0},\"example\":50},\"skip\":{\"name\":\"skip\",\"in\":\"query\",\"description\":\"Skip the first n items, see [Paging - Skip](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionskip)\",\"schema\":{\"type\":\"integer\",\"minimum\":0}},\"count\":{\"name\":\"count\",\"in\":\"query\",\"description\":\"Include count of items, see [Count](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptioncount)\",\"schema\":{\"type\":\"boolean\"}},\"search\":{\"name\":\"search\",\"in\":\"query\",\"description\":\"Search items by search phrases, see [Searching](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionsearch)\",\"schema\":{\"type\":\"string\"}}},\"responses\":{\"error\":{\"description\":\"Error\",\"content\":{\"application/json\":{\"schema\":{\"$ref\":\"#/components/schemas/error\"}}}}}}}"
+}
