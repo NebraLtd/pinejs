@@ -384,6 +384,10 @@ const bindsForAffectedIds = (
 	const tableName =
 		getAbstractSqlModel(request).tables[resolveSynonym(request)].name;
 
+	// If we're deleting the affected IDs then we can't narrow our rule to
+	// those IDs that are now missing
+	const isDelete = request.method === 'DELETE';
+
 	const odataBinds: { [key: string]: any } = {};
 	for (const bind of bindings) {
 		if (
@@ -394,9 +398,6 @@ const bindsForAffectedIds = (
 			continue;
 		}
 
-		// If we're deleting the affected IDs then we can't narrow our rule to
-		// those IDs that are now missing
-		const isDelete = request.method === 'DELETE';
 		const bindName = bind[1];
 		if (!isDelete && bindName === tableName) {
 			odataBinds[bindName] = ['Text', `{${request.affectedIds}}`];
