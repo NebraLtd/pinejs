@@ -366,16 +366,31 @@ export const isModelNew = async (
 	return !cachedIsModelNew.has(modelName);
 };
 
-const bindsForAffectedIds = (bindings: AbstractSQLCompiler.Binding[], request?: Pick<uriParser.ODataRequest, 'vocabulary' | 'abstractSqlModel' | 'method' | 'resourceName' | 'affectedIds'>) => {
+const bindsForAffectedIds = (
+	bindings: AbstractSQLCompiler.Binding[],
+	request?: Pick<
+		uriParser.ODataRequest,
+		| 'vocabulary'
+		| 'abstractSqlModel'
+		| 'method'
+		| 'resourceName'
+		| 'affectedIds'
+	>,
+) => {
 	if (!request || !request.affectedIds) {
 		return {};
 	}
 
-	const tableName = getAbstractSqlModel(request).tables[resolveSynonym(request)].name;
+	const tableName =
+		getAbstractSqlModel(request).tables[resolveSynonym(request)].name;
 
-	const odataBinds: {[key: string]: any} = {};
+	const odataBinds: { [key: string]: any } = {};
 	for (const bind of bindings) {
-		if (bind.length !== 2 || bind[0] !== 'Bind' || typeof bind[1] !== 'string') {
+		if (
+			bind.length !== 2 ||
+			bind[0] !== 'Bind' ||
+			typeof bind[1] !== 'string'
+		) {
 			continue;
 		}
 
@@ -388,17 +403,22 @@ const bindsForAffectedIds = (bindings: AbstractSQLCompiler.Binding[], request?: 
 		} else {
 			odataBinds[bindName] = ['Text', '{}'];
 		}
-	};
+	}
 
 	return odataBinds;
-}
+};
 
 export const validateModel = async (
 	tx: Db.Tx,
 	modelName: string,
 	request?: Pick<
 		uriParser.ODataRequest,
-		'abstractSqlQuery' | 'modifiedFields' | 'method' | 'vocabulary' | 'resourceName' | 'affectedIds'
+		| 'abstractSqlQuery'
+		| 'modifiedFields'
+		| 'method'
+		| 'vocabulary'
+		| 'resourceName'
+		| 'affectedIds'
 	>,
 ): Promise<void> => {
 	await Promise.all(
