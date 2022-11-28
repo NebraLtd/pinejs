@@ -366,7 +366,7 @@ export const isModelNew = async (
 	return !cachedIsModelNew.has(modelName);
 };
 
-const bindsForAffectedIds = (bindings: AbstractSQLCompiler.Binding[], request?: Pick<uriParser.ODataRequest, 'vocabulary' | 'abstractSqlModel' | 'resourceName' | 'affectedIds'>) => {
+const bindsForAffectedIds = (bindings: AbstractSQLCompiler.Binding[], request?: Pick<uriParser.ODataRequest, 'vocabulary' | 'abstractSqlModel' | 'method' | 'resourceName' | 'affectedIds'>) => {
 	if (!request || !request.affectedIds) {
 		return {};
 	}
@@ -379,8 +379,11 @@ const bindsForAffectedIds = (bindings: AbstractSQLCompiler.Binding[], request?: 
 			continue;
 		}
 
+		// If we're deleting the affected IDs then we can't narrow our rule to
+		// those IDs that are now missing
+		const isDelete = request.method === 'DELETE';
 		const bindName = bind[1];
-		if (bindName === tableName) {
+		if (!isDelete && bindName === tableName) {
 			odataBinds[bindName] = ['Text', `{${request.affectedIds}}`];
 		} else {
 			odataBinds[bindName] = ['Text', '{}'];
