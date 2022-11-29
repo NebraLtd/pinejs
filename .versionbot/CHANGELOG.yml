@@ -1,4 +1,19 @@
 - commits:
+    - subject: "Add config for multer (file-uploads) with constraints for img-size and
+        following routes: /team, /organization"
+      hash: 1a041fedf2bbc03f5d492d740400026a3dd704ec
+      body: ""
+      footer:
+        Change-Type: patch
+        change-type: patch
+        Signed-off-by: Nitish Agarwal <1592163+nitishagar@users.noreply.github.com>
+        signed-off-by: Nitish Agarwal <1592163+nitishagar@users.noreply.github.com>
+      author: Nitish Agarwal
+      nested: []
+  version: 14.53.2
+  title: ""
+  date: 2022-11-29T13:01:08.484Z
+- commits:
     - subject: Update dependencies
       hash: 9b24d54cff3f2e83456c9c2bd60ade9de8ab755b
       body: >
