@@ -24,14 +24,14 @@
     "prettify": "balena-lint -e js -e ts --fix src build typings Gruntfile.ts"
   },
   "dependencies": {
-    "@balena/abstract-sql-compiler": "^7.25.3",
-    "@balena/abstract-sql-to-typescript": "^1.3.0",
-    "@balena/lf-to-abstract-sql": "^4.7.0",
+    "@balena/abstract-sql-compiler": "8.0.0-build-8-x-76fadccbada35c63b1b6a55a3d7185bff26a4198-1",
+    "@balena/abstract-sql-to-typescript": "2.0.0-build-2-x-4f50a46db2874192c8a775d70a37b9f0a5046c01-1",
     "@balena/env-parsing": "^1.1.0",
+    "@balena/lf-to-abstract-sql": "^4.7.0",
     "@balena/odata-parser": "^2.4.2",
     "@balena/odata-to-abstract-sql": "^5.8.0",
     "@balena/sbvr-parser": "^1.4.3",
-    "@balena/sbvr-types": "^3.4.18",
+    "@balena/sbvr-types": "4.0.0-build-4-x-50dfd2d5d5cdbf7a0c2adb132934e4cf7233106e-1",
     "@types/body-parser": "^1.19.2",
     "@types/compression": "^1.7.2",
     "@types/cookie-parser": "^1.4.3",
