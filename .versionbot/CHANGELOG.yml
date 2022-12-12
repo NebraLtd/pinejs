@@ -1,4 +1,18 @@
 - commits:
+    - subject: Use `affectedIds` to narrow the number of rows checked by rules
+      hash: 1acccc43d36a847b5db650fba6e73141525222f0
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Carol Schulze <carol@balena.io>
+        signed-off-by: Carol Schulze <carol@balena.io>
+      author: Carol Schulze
+      nested: []
+  version: 14.55.0
+  title: ""
+  date: 2022-12-12T13:28:40.210Z
+- commits:
     - subject: Update postgres Docker tag to v15
       hash: e1c8e1436dae44739a844ecc86c09fd084f09e86
       body: |
