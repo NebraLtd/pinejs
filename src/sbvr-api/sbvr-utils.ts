@@ -569,7 +569,10 @@ export const executeModels = async (
 					let uri = '/dev/model';
 					const body: AnyObject = {
 						is_of__vocabulary: model.vocab,
-						model_value: model[modelType],
+						model_value:
+							typeof model[modelType] === 'string'
+								? { value: model[modelType] }
+								: model[modelType],
 						model_type: modelType,
 					};
 					const id = result?.[0]?.id;
@@ -1697,9 +1700,16 @@ export const executeStandardModels = async (tx: Db.Tx): Promise<void> => {
 					ADD COLUMN IF NOT EXISTS "modified at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL;
 				`,
 				'15.0.0-data-types': async ($tx, sbvrUtils) => {
+					await $tx.executeSql(`\
+						UPDATE "model"
+						SET "model value" = '{"value":' || "model value" || '}'
+						WHERE "model type" IN ('se', 'odataMetadata');`);
 					switch (sbvrUtils.db.engine) {
 						case 'mysql':
 							await $tx.executeSql(`\
+								UPDATE "model"
+								SET "model value" =
+								WHERE "model type" IN ('se', 'odataMetadata');
 								ALTER TABLE "model"
 								MODIFY "model value" JSON NOT NULL;`);
 							break;
