@@ -1,4 +1,105 @@
 - commits:
+    - subject: "Use `{ value: modelValue }` for se and odataMetadata model entries"
+      hash: f1e16e0c4e13d9575cf718844506c089b743328c
+      body: |
+        This avoids putting strings directly into a JSON field
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Switch mysql `sql_mode` from `ANSI_QUOTES` to `ANSI`
+      hash: 939b39a90c2a8e06b68cc6571192f7792e8d8c9e
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Make `actor` a required property of the req.apiKey object
+      hash: a68a9b4755fae31f33df3dd93892fda4bfb98a81
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Change `resolveAuthHeader`/`resolveApiKey` to throw on invalid api keys
+      hash: bff3348af87368529d61f82f1cbbf15bb2034aab
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Do not bail in `resolveAuthHeader` if there is an existing api key
+      hash: 7d94c86008720d0cba02a2a0ee761e53b0fce3e5
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Do not bail in `resolveApiKey` if there is an existing api key
+      hash: 8f1df2477f599f8e1fa06255a63e4160a9caa3c7
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Treat ConceptType fields as expandable/foreign key fields as they are
+      hash: 07e2939fca377194b93728f78611184069a12e87
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Throw rather than warn on invalid value for `PINEJS_DEBUG`
+      hash: 89938982046a955e385350a39abb46b7011d3323
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Remove support for `DEBUG` env var in favor of only `PINEJS_DEBUG`
+      hash: a7ae4d9a13a64a4cdf82a3100407d1c0b3cd6aca
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Set minimum supported nodejs version to 16.13.0 and tsconfig to es2021
+      hash: 030cda7367447c9f6c404f34b2fe1b15d0300762
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Reflect the usage of BOOLEAN/JSON database types
+      hash: 40d59f8d0764c1ff4024a37b379c9242bee9825c
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+    - subject: Update @balena/abstract-sql-compiler to 8.x and @balena/sbvr-types to 4.x
+      hash: 61d5ed81295ee0a39a3a01401c73bb65b612b67d
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Pagan Gazzard
+      nested: []
+  version: 15.0.0
+  title: ""
+  date: 2022-12-20T15:57:26.631Z
+- commits:
     - subject: Fix running linting as part of `npm test`
       hash: 9bdc35e17faa8d9958b2046b691e9d28fb37d51c
       body: ""
