@@ -75,10 +75,10 @@ export const init = async <T extends string>(
 		}
 		await Promise.all(promises);
 
-		if ( process.env.PINEJS_STORAGE_ENGINE === 'S3' ) {
+		if (process.env.PINEJS_STORAGE_ENGINE === 'S3') {
 			initS3Storage();
 		}
-	
+
 		return cfgLoader;
 	} catch (err: any) {
 		console.error('Error initialising server', err, err.stack);
