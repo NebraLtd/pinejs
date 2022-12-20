@@ -1,7 +1,10 @@
 import * as supertest from 'supertest';
+import axios from 'axios';
 import { expect } from 'chai';
 const fixturePath = __dirname + '/fixtures/01-constrain/config';
 import { testInit, testDeInit, testLocalServer } from './lib/test-init';
+import * as fsBase from 'fs';
+const fs = fsBase.promises;
 
 describe('01 basic constrain tests', function () {
 	let pineServer: Awaited<ReturnType<typeof testInit>>;
@@ -73,5 +76,39 @@ describe('01 basic constrain tests', function () {
 					'It is necessary that each student that has a semester credits, has a semester credits that is greater than or equal to 4 and is less than or equal to 16.',
 				);
 		});
+
+		it('create a student with a picture', async () => {
+			const filePath = 'test/fixtures/resources/avatar-profile.png';
+			const filename = 'john_doe_small.png';
+			const fileInfo = await fs.stat(filePath);
+			const fileSize = fileInfo.size;
+
+			const contentType = 'image/png';
+			const res = await supertest(testLocalServer)
+				.post('/university/student')
+				.field('name','John')
+				.field('lastname','Doe')
+				.field('matrix_number',2)
+				.field('birthday', '2022-09-14')
+				.field('semester_credits',10)
+				.attach('picture', filePath, { filename: filename, contentType: contentType});
+			expect(res.status).to.equals(201);							
+			const student = res.body;
+
+			expect(student.picture.size).to.equals(fileSize);
+			expect(student.picture.filename).to.equals(filename);
+			expect(student.picture.contentType).to.equals(contentType);
+
+			const photoRes = await axios.get(student.picture.href, {
+        responseType: 'arraybuffer',
+        headers: {
+					'Accept': '*/*'            
+        }
+    	});
+			expect(photoRes.status).to.equals(200);
+			const receivedSize = photoRes.data.length;
+			expect(receivedSize).to.equals(fileSize);
+		});
+
 	});
 });

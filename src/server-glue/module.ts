@@ -9,6 +9,8 @@ import * as migratorUtils from '../migrator/utils';
 
 import * as sbvrUtils from '../sbvr-api/sbvr-utils';
 
+import { initS3Storage } from '@balena/pinejs-s3-storage/out';
+
 export * as dbModule from '../database-layer/db';
 export { PinejsSessionStore } from '../pinejs-session-store/pinejs-session-store';
 export * as sbvrUtils from '../sbvr-api/sbvr-utils';
@@ -17,6 +19,7 @@ export * as errors from '../sbvr-api/errors';
 export * as env from '../config-loader/env';
 export * as types from '../sbvr-api/common-types';
 export * as hooks from '../sbvr-api/hooks';
+
 export type { configLoader as ConfigLoader };
 export type { migratorUtils as Migrator };
 
@@ -72,6 +75,10 @@ export const init = async <T extends string>(
 		}
 		await Promise.all(promises);
 
+		if ( process.env.PINEJS_STORAGE_ENGINE === 'S3' ) {
+			initS3Storage();
+		}
+	
 		return cfgLoader;
 	} catch (err: any) {
 		console.error('Error initialising server', err, err.stack);
