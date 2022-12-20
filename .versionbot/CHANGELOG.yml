@@ -1,4 +1,23 @@
 - commits:
+    - subject: Introduce control means for async migration execution
+      hash: 0b8aa862ba7320e6973fb6498c0510b0013f8b38
+      body: >
+        Introduce env var PINEJS_ASYNC_MIGRATION_ENABLED to control async
+        migration execution on startup.
+
+
+        Test with SIGUSR2 listener to toggle migration execution during runtime.
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+      nested: []
+  version: 14.55.0
+  title: ""
+  date: 2022-12-20T18:44:12.631Z
+- commits:
     - subject: Update debugging docs
       hash: 6c6331cab24edc0d1264166d885c52246f71d04f
       body: ""
