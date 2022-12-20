@@ -1,4 +1,23 @@
 - commits:
+    - subject: Record async migration execution time
+      hash: 04cded040973edfc4820b6fd1ab763fcb5907e75
+      body: |
+        Record async migration execution time in migration status table.
+        Add migrationMetricsEmitter to emit metrics
+        Current metrics emitted:
+        - async_migration_status
+        - sync_migration_status
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+      nested: []
+  version: 14.55.0
+  title: ""
+  date: 2022-12-20T20:09:16.151Z
+- commits:
     - subject: Update debugging docs
       hash: 6c6331cab24edc0d1264166d885c52246f71d04f
       body: ""
