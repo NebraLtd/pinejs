@@ -53,6 +53,7 @@ export const cache = {
 	apiKeyActorId: false as CacheOpts,
 };
 
+import { boolVar } from '@balena/env-parsing';
 import * as memoize from 'memoizee';
 import memoizeWeak = require('memoizee/weak');
 export const createCache = <T extends (...args: any[]) => any>(
@@ -115,6 +116,10 @@ export const db = {
 	checkReadOnlyQueries: DEBUG,
 };
 
+// for better readability of logging
+export const booleanToEnabledString = (input: boolean) =>
+	input ? 'enabled' : 'disabled';
+
 export const migrator = {
 	lockTimeout: 5 * 60 * 1000,
 	// Used to delay the failure on lock taking, to avoid spam taking
@@ -123,4 +128,21 @@ export const migrator = {
 	asyncMigrationDefaultBackoffDelayMS: 60000,
 	asyncMigrationDefaultErrorThreshold: 10,
 	asyncMigrationDefaultBatchSize: 1000,
+
+	/**
+	 * @param asyncMigrationIsEnabled Switch on/off the execution of async migrations
+	 * Example implementation with listening on SIGUSR2 to toggle the AsyncMigrationExecution enable switch
+	 * For runtime switching the async migration execution the SIGUSR2 signal is interpreted as toggle.
+	 * When the process receives a SIGUSR2 signal the async migrations will toggle to be enabled or disabled.
+	 * @example
+	 * process.on('SIGUSR2', () => {
+	 * 	console.info(
+	 * 		`Received SIGUSR2 to toggle async migration execution enabled
+	 * 					from ${migrator.asyncMigrationIsEnabled}
+	 * 					to ${!migrator.asyncMigrationIsEnabled} `,
+	 * 	);
+	 * 	migrator.asyncMigrationIsEnabled = !migrator.asyncMigrationIsEnabled;
+	 * });
+	 */
+	asyncMigrationIsEnabled: boolVar('PINEJS_ASYNC_MIGRATION_ENABLED', true),
 };
