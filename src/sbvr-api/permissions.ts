@@ -1514,9 +1514,6 @@ export const resolveApiKey = async (
 };
 
 export const customApiKeyMiddleware = (paramName = 'apikey') => {
-	if (paramName == null) {
-		paramName = 'apikey';
-	}
 	return async (
 		req: HookReq | Express.Request,
 		_res?: Express.Response,
