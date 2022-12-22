@@ -8,6 +8,7 @@ import * as migrator from '../migrator/sync';
 import * as migratorUtils from '../migrator/utils';
 
 import * as sbvrUtils from '../sbvr-api/sbvr-utils';
+import { optionalVar } from '@balena/env-parsing';
 
 export * as dbModule from '../database-layer/db';
 export { PinejsSessionStore } from '../pinejs-session-store/pinejs-session-store';
@@ -28,8 +29,8 @@ if (dbModule.engines.websql != null) {
 	};
 } else {
 	let databaseURL: string;
-	if (process.env.DATABASE_URL) {
-		databaseURL = process.env.DATABASE_URL;
+	if (optionalVar('DATABASE_URL')) {
+		databaseURL = optionalVar('DATABASE_URL', '');
 	} else if (dbModule.engines.postgres != null) {
 		databaseURL = 'postgres://postgres:.@localhost:5432/postgres';
 	} else if (dbModule.engines.mysql == null) {
@@ -57,6 +58,8 @@ export const init = async <T extends string>(
 		await cfgLoader.loadConfig(migrator.config);
 
 		const promises: Array<Promise<void>> = [];
+		// cannot be replaced with env-parsing module as it's overwritten in webpack process with a text-match plugin.
+		// needs to remain `process.env.SBVR_SERVER_ENABLED` as this is the string the plugin will search for.
 		if (process.env.SBVR_SERVER_ENABLED) {
 			const sbvrServer = await import('../data-server/sbvr-server');
 			const transactions = require('../http-transactions/transactions');
@@ -67,6 +70,8 @@ export const init = async <T extends string>(
 					.then(() => transactions.addModelHooks('data')),
 			);
 		}
+		// cannot be replaced with env-parsing module as it's overwritten in webpack process with a text-match plugin.
+		// needs to remain `process.env.CONFIG_LOADER_DISABLED` as this is the string the plugin will search for.
 		if (!process.env.CONFIG_LOADER_DISABLED) {
 			promises.push(cfgLoader.loadApplicationConfig(config));
 		}

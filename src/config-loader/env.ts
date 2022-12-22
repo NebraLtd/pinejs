@@ -1,5 +1,7 @@
+import { boolVar, intVar, optionalVar } from '@balena/env-parsing';
 // TODO-MAJOR: Drop the support for the global `DEBUG` env var
-const { DEBUG: globalDebug, PINEJS_DEBUG } = process.env;
+const globalDebug = boolVar('DEBUG', false);
+const PINEJS_DEBUG = optionalVar('PINEJS_DEBUG');
 if (![undefined, '', '0', '1'].includes(PINEJS_DEBUG)) {
 	// TODO-MAJOR: Throw on invalid value
 	console.warn(`Invalid value for PINEJS_DEBUG '${PINEJS_DEBUG}'`);
@@ -81,17 +83,7 @@ export const createCache = <T extends (...args: any[]) => any>(
 	});
 };
 
-let timeoutMS: number;
-if (process.env.TRANSACTION_TIMEOUT_MS) {
-	timeoutMS = parseInt(process.env.TRANSACTION_TIMEOUT_MS, 10);
-	if (Number.isNaN(timeoutMS) || timeoutMS <= 0) {
-		throw new Error(
-			`Invalid valid for TRANSACTION_TIMEOUT_MS: ${process.env.TRANSACTION_TIMEOUT_MS}`,
-		);
-	}
-} else {
-	timeoutMS = 10000;
-}
+const timeoutMS = intVar('TRANSACTION_TIMEOUT_MS', 10000);
 
 export const db = {
 	poolSize: 50,

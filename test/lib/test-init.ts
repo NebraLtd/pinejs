@@ -1,3 +1,4 @@
+import { optionalVar } from '@balena/env-parsing';
 import { ChildProcess, fork } from 'child_process';
 export const testListenPort = 1337;
 export const testLocalServer = `http://localhost:${testListenPort}`;
@@ -11,7 +12,7 @@ export async function testInit(
 		const processArgs = {
 			fixturePath,
 			testListenPort: pineListenPort,
-			deleteDb: deleteDb || process.env.DELETE_DB,
+			deleteDb: deleteDb || optionalVar('DELETE_DB'),
 		};
 
 		const testServer = fork(
