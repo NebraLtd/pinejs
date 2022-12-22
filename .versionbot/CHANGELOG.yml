@@ -1,4 +1,19 @@
 - commits:
+    - subject: Update dependency @types/node to 18.11.17
+      hash: bd5b0ad30aea4e04e7263ec857b697d2ae3596f8
+      body: |
+        Update @types/node to 18.11.17
+
+        Update @types/node from 12.20.55 to 18.11.17
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Renovate Bot
+      nested: []
+  version: 14.55.0
+  title: ""
+  date: 2022-12-22T17:00:43.179Z
+- commits:
     - subject: Fix pre-commit husky hook
       hash: c146ecb23faa8aeaa93086e6a4e78b5bdc3fecbc
       body: |
