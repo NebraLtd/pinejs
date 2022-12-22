@@ -1,4 +1,19 @@
 - commits:
+    - subject: Utilize @balena/env-parsing module
+      hash: dff39e0eeec12300784074f0854aeeddbdf1ef04
+      body: |
+        Skip webpack DefinitionPlugin replacer process.env.<vars>
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+      nested: []
+  version: 14.54.5
+  title: ""
+  date: 2022-12-22T16:31:50.392Z
+- commits:
     - subject: Fix pre-commit husky hook
       hash: c146ecb23faa8aeaa93086e6a4e78b5bdc3fecbc
       body: |
