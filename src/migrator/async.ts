@@ -201,7 +201,7 @@ const $run = async (
 				try {
 					const $migrationState = await sbvrUtils.db.transaction(
 						async (tx) =>
-							await lockMigrations(tx, modelName, async () => {
+							await lockMigrations(tx, modelName, false, async () => {
 								const migrationState = await readMigrationStatus(tx, key);
 
 								if (!migrationState) {
