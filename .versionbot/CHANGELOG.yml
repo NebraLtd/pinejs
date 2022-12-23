@@ -1,4 +1,21 @@
 - commits:
+    - subject: Use postgres advisory locks for migration locking.
+      hash: 6887f594402a66a68e0c3bbdec4ad35a9dfec8d4
+      body: |
+        Avoid starvation of sync migrations while
+        aggressive async migrations take the model lock
+        over and over again.
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+      nested: []
+  version: 14.55.0
+  title: ""
+  date: 2022-12-23T17:14:13.176Z
+- commits:
     - subject: Fix pre-commit husky hook
       hash: c146ecb23faa8aeaa93086e6a4e78b5bdc3fecbc
       body: |
