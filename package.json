@@ -55,6 +55,7 @@
     "express-session": "^1.17.3",
     "lodash": "^4.17.21",
     "memoizee": "^0.4.15",
+    "odata-openapi": "^0.19.1",
     "pinejs-client-core": "^6.12.2",
     "randomstring": "^1.2.3",
     "typed-error": "^3.2.1"
