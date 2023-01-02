@@ -1,4 +1,22 @@
 - commits:
+    - subject: Return $metadata resource as odata + openapi spec
+      hash: 9b62b0e30a7cae95f94e9864e81c4025ca761e75
+      body: |
+        Returning odata and openapi specs in json format.
+        Specs are scoped to the request permissions.
+        Different users (roles) will receive different metadata endpoints
+        and resources.
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: fisehara <harald@balena.io>
+        signed-off-by: fisehara <harald@balena.io>
+      author: fisehara
+      nested: []
+  version: 14.55.0
+  title: ""
+  date: 2023-01-02T14:58:55.890Z
+- commits:
     - subject: Fix pre-commit husky hook
       hash: c146ecb23faa8aeaa93086e6a4e78b5bdc3fecbc
       body: |
