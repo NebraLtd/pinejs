@@ -1,4 +1,23 @@
 - commits:
+    - subject: Add type WebResource
+      hash: b03d4236fdacd40cb69ba45e5cc1697d8a7ea561
+      body: |
+        Amazon S3 and MinIO
+        Add tests for faulty storage adapters
+        Enhance error handling
+        Provide functions to handle the storageRegistry
+        Update README with a WebResource entry
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Ramiro Gonzalez <ramiro.gonzalez@balena.io>
+        signed-off-by: Ramiro Gonzalez <ramiro.gonzalez@balena.io>
+      author: Ramiro González Maciel
+      nested: []
+  version: 14.55.0
+  title: ""
+  date: 2023-01-06T14:08:01.043Z
+- commits:
     - subject: Fix running linting as part of `npm test`
       hash: 9bdc35e17faa8d9958b2046b691e9d28fb37d51c
       body: ""
