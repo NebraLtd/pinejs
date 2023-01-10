@@ -1,4 +1,16 @@
 - commits:
+    - subject: Add support for models that are translated to other (newer) models
+      hash: ef48f8f4710d08c1a1d25fc91509215dffc7869c
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+      nested: []
+  version: 14.55.0
+  title: ""
+  date: 2023-01-10T17:26:12.096Z
+- commits:
     - subject: Fix pre-commit husky hook
       hash: c146ecb23faa8aeaa93086e6a4e78b5bdc3fecbc
       body: |
