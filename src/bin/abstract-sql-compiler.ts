@@ -22,7 +22,8 @@ const generateTypes = (inputFile: string, outputFile?: string) => {
 	const { abstractSqlToTypescriptTypes } =
 		require('@balena/abstract-sql-to-typescript') as typeof import('@balena/abstract-sql-to-typescript');
 	const abstractSql = getAbstractSqlModelFromFile(inputFile);
-	const types = abstractSqlToTypescriptTypes(abstractSql);
+	// TODO: REMOVE THIS, it's temporary due to mismatched abstract-sql-compiler versions
+	const types = abstractSqlToTypescriptTypes(abstractSql as any);
 
 	writeAll(types, outputFile);
 };

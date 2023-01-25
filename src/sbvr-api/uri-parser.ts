@@ -147,7 +147,8 @@ export const memoizedParseOdata = (() => {
 
 export const memoizedGetOData2AbstractSQL = memoizeWeak(
 	(abstractSqlModel: AbstractSQLCompiler.AbstractSqlModel) => {
-		return new OData2AbstractSQL(abstractSqlModel, undefined, {
+		// TODO: REMOVE THIS, it's temporary due to mismatched abstract-sql-compiler versions
+		return new OData2AbstractSQL(abstractSqlModel as any, undefined, {
 			// Use minimized aliases when not in debug mode for smaller queries
 			minimizeAliases: !env.DEBUG,
 		});
@@ -423,7 +424,8 @@ export const translateUri = <
 				return true;
 			},
 		});
-		request.abstractSqlQuery = abstractSqlQuery;
+		// TODO: REMOVE THIS, it's temporary due to mismatched abstract-sql-compiler versions
+		request.abstractSqlQuery = abstractSqlQuery as any;
 		return request;
 	}
 	return request;
