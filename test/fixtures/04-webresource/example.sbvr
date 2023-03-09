@@ -1,0 +1,18 @@
+Vocabulary: example
+
+Term: name
+	Concept Type: Short Text (Type)
+
+Term: logo image
+	Concept Type: WebResource (Type)
+
+Term: organization
+
+Fact Type: organization has name
+	Necessity: each organization has exactly one name
+
+Fact Type: organization has logo image
+	Necessity: each organization has at most one logo image
+	Necessity: each logo image is of exactly one organization.
+	Necessity: each organization that has a logo image, has a logo image that has a Content Type (Type) that is equal to "image/png" or "image/jpg" or "image/jpeg".
+	Necessity: each organization that has a logo image, has a logo image that has a Size (Type) that is less than 540000000.

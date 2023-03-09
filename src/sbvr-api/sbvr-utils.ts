@@ -1151,6 +1151,10 @@ const $getAffectedIds = async ({
 	return result.rows.map((row) => row[idField]);
 };
 
+export const getModels = () => {
+	return models;
+};
+
 const runODataRequest = (req: Express.Request, vocabulary: string) => {
 	if (env.DEBUG) {
 		api[vocabulary].logger.log('Parsing', req.method, req.url);
@@ -1326,8 +1330,13 @@ const runODataRequest = (req: Express.Request, vocabulary: string) => {
 	};
 };
 
-export const handleODataRequest: Express.Handler = async (req, res, next) => {
+export const getApiRoot = (req: Express.Request): string | null => {
 	const [, apiRoot] = req.url.split('/', 2);
+	return apiRoot;
+};
+
+export const handleODataRequest: Express.Handler = async (req, res, next) => {
+	const apiRoot = getApiRoot(req);
 	if (apiRoot == null || models[apiRoot] == null) {
 		return next('route');
 	}
